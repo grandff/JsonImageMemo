@@ -25,6 +25,7 @@ class MemoFormController: UIViewController {
     --> 수정이 되는지 확인
     7. 메모 삭제 기능 구현
     8. 편집 중 화면을 닫을때 저장여부를 선택하는 경고창을 표시하기 위해 textviewdelegate 추가
+    9. 화면이 열릴땐 delegate를, 닫힐땐 delegeate가 nil이도록 설정
     */
     
     @IBOutlet weak var titleTextField: UITextField!
@@ -52,6 +53,9 @@ class MemoFormController: UIViewController {
         }else{
             navigationItem.title = "새 메모"
         }
+        
+        // textview의 delegate 설정
+        memoTextField.delegate = self
     }
     
     // 메모 등록 액션(3)(6)
@@ -87,17 +91,17 @@ class MemoFormController: UIViewController {
         dismiss(animated: true, completion: nil)
     }
     
-
-    /*
-    // MARK: - Navigation
-
-    // In a storyboard-based application, you will often want to do a little preparation before navigation
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        // Get the new view controller using segue.destination.
-        // Pass the selected object to the new view controller.
+    // 화면이 열릴 경우 delegate 처리(9)
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        navigationController?.presentationController?.delegate = self
     }
-    */
-
+    
+    // 화면이 닫힐 경우 delegate 처리(9)
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        navigationController?.presentationController?.delegate = nil
+    }
 }
 
 // Notification 추가(2)(5)
