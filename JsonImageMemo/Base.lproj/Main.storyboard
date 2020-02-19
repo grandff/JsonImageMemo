@@ -200,7 +200,11 @@
                                         </connections>
                                     </barButtonItem>
                                     <barButtonItem style="plain" systemItem="flexibleSpace" id="uaD-5y-6Vt"/>
-                                    <barButtonItem systemItem="action" id="8VA-1q-KDX"/>
+                                    <barButtonItem systemItem="action" id="8VA-1q-KDX">
+                                        <connections>
+                                            <action selector="share:" destination="gp7-zb-CqC" id="Yug-g1-WRe"/>
+                                        </connections>
+                                    </barButtonItem>
                                 </items>
                             </toolbar>
                         </subviews>

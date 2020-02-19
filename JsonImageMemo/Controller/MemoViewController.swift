@@ -22,6 +22,7 @@ class MemoViewController: UIViewController {
      6. 메모 등록 폼으로 데이터를 전달해줄 세그웨이 설정(스토리보드에서 연결 필수)
      7. 수정 시 form에서 observer를 받아 새로고침 해줌
      --> MemoData에도 해당 메서드 구현
+     8. 메모 공유 기능 구현
      */
     
     var memo : Memo?        // 세그웨이 데이터 저장용(2)
@@ -70,8 +71,16 @@ class MemoViewController: UIViewController {
         alert.addAction(cancelAction)
         
         present(alert, animated : true, completion : nil)
-        
     }
+    
+    // 메모 공유 기능(8)
+    @IBAction func share(_ sender: Any) {
+        guard let memo = memo?.content else {return}
+        
+        let vc = UIActivityViewController(activityItems: [memo], applicationActivities: nil)
+        present(vc, animated: true, completion: nil)
+    }
+    
     
 }
 

@@ -26,6 +26,7 @@ class MemoFormController: UIViewController {
     7. 메모 삭제 기능 구현
     8. 편집 중 화면을 닫을때 저장여부를 선택하는 경고창을 표시하기 위해 textviewdelegate 추가
     9. 화면이 열릴땐 delegate를, 닫힐땐 delegeate가 nil이도록 설정
+    10. 키보드가 화면을 가리지 않도록 해주는 notification 설정
     */
     
     @IBOutlet weak var titleTextField: UITextField!
@@ -33,6 +34,20 @@ class MemoFormController: UIViewController {
         
     var editMemo : Memo?        // 매모 객체 전달받을 변수(4)
     var originalMemoContent : String?       // 메모 내용이 수정됐는지 확인 하기 위해 오리지날 값을 저장하는 변수(5)
+    
+    var willShowToken : NSObjectProtocol?   // 키보드가 올라올 경우 호출(10)
+    var willHideToken : NSObjectProtocol?   // 키보드가 사라질 경우 호출(10)
+    
+    // 키보드 토큰 값이 있을 경우 미리 삭제(10)
+    deinit{
+        if let token = willShowToken{
+            NotificationCenter.default.removeObserver(token)
+        }
+        
+        if let token = willHideToken{
+            NotificationCenter.default.removeObserver(token)
+        }
+    }
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -56,6 +71,37 @@ class MemoFormController: UIViewController {
         
         // textview의 delegate 설정
         memoTextField.delegate = self
+        
+        // 키보드가 보여질 경우 생성되는 옵저버(10)
+        willShowToken = NotificationCenter.default.addObserver(forName: UIResponder.keyboardWillShowNotification, object: nil, queue: OperationQueue.main, using: {[weak self] (noti) in
+            // 키보드 높이 만큼 여백을 추가해야되는데, 실행환경마다 다르므로 노티피케이션 값에 따라 구현해야함
+            guard let strongSelf = self else {return}
+            
+            // 높이 속성이 height에 저장됨
+            if let frame = noti.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue{
+                let height = frame.cgRectValue.height
+                
+                var inset = strongSelf.memoTextField.contentInset        // 현재 값
+                inset.bottom = height       // 키보드 높이값을 하단에 설정해줌
+                strongSelf.memoTextField.contentInset = inset        // 설정한 값을 적용
+                
+                inset = strongSelf.memoTextField.verticalScrollIndicatorInsets // 스크롤바에도 똑같은 여백 추가
+                strongSelf.memoTextField.verticalScrollIndicatorInsets = inset
+            }
+        })
+        
+        // 키보드가 사라질 경우 생성되는 옵저버(10) 새로운 옵저버를 호출할때는 기존 호출한 옵저버 메서드가 다 끝난후 해야함
+        willHideToken = NotificationCenter.default.addObserver(forName: UIResponder.keyboardWillHideNotification, object: nil, queue: OperationQueue.main, using: {[weak self] (noti) in
+            // 키보드가 사라질 경우 여백 제거
+            guard let strongSelf = self else {return}
+            var inset = strongSelf.memoTextField.contentInset
+            inset.bottom = 0
+            strongSelf.memoTextField.contentInset = inset
+            
+            inset = strongSelf.memoTextField.verticalScrollIndicatorInsets
+            inset.bottom = 0
+            strongSelf.memoTextField.verticalScrollIndicatorInsets = inset
+        })
     }
     
     // 메모 등록 액션(3)(6)
